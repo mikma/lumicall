@@ -735,6 +735,26 @@ public class SipProvider implements Configurable, TransportListener,
 		}
 	}
 
+        private SRVRecordHelper.Service sipSvc =
+		new SRVRecordHelper.Service() {
+			public static final String NAME = "sip";
+			public static final String PROTO = "udp";
+
+			public String getName() { return NAME; }
+			public int getDefaultPort() { return 5060; }
+			public String getDefaultProtocol() { return PROTO; }
+		};
+
+	private SRVRecordHelper.Service sipsSvc =
+		new SRVRecordHelper.Service() {
+			public static final String NAME = "sips";
+			public static final String PROTO = "tcp";
+
+			public String getName() { return NAME; }
+			public int getDefaultPort() { return 5061; }
+			public String getDefaultProtocol() { return PROTO; }
+		};
+
 	/**
 	 * Sends a Message, specifing the transport portocol, nexthop address and
 	 * port.
@@ -758,8 +778,8 @@ public class SipProvider implements Configurable, TransportListener,
 		try {
 			int _dest_port = dest_port;
 			SRVRecordHelper srh = new SRVRecordHelper(
-					proto.equals("tls") ? "sips" : "sip",
-					proto.equals("tls") ? "tcp" : proto,
+					proto.equals("tls") ? sipsSvc : sipSvc,
+					proto.equals("tls") ? sipsSvc.getDefaultProtocol() : proto,
 					dest_addr,
 					dest_port);
 			if(srh.isEmpty())

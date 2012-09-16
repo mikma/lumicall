@@ -514,17 +514,37 @@ public class UserAgent extends CallListenerAdapter {
 		// (depends on whether we are caller/callee)
 		//localAgent.setControlling(true);
 	}
-	
+
+	private SRVRecordHelper.Service stunSvc =
+		new SRVRecordHelper.Service() {
+			public static final String NAME = "stun";
+			public static final String PROTO = "udp";
+
+			public String getName() { return NAME; }
+			public int getDefaultPort() { return 3478; }
+			public String getDefaultProtocol() { return PROTO; }
+		};
+
+	private SRVRecordHelper.Service stunsSvc =
+		new SRVRecordHelper.Service() {
+			public static final String NAME = "stuns";
+			public static final String PROTO = "tcp";
+
+			public String getName() { return NAME; }
+			public int getDefaultPort() { return 5349; }
+			public String getDefaultProtocol() { return PROTO; }
+		};
 
 	protected void findStunServers(LongTermCredential ltc, String stunServer, int port, Transport transport) {
-		String querySvc = "stun";
-		String queryProto = "udp";
+		SRVRecordHelper.Service querySvc;
+
 		if(transport == Transport.TLS) {
-			querySvc = "stuns";
-			queryProto = "tcp";
+			querySvc = stunsSvc;
+		} else {
+			querySvc = stunSvc;
 		}
-		
-		SRVRecordHelper srh = new SRVRecordHelper(querySvc, queryProto, stunServer, port);
+
+		SRVRecordHelper srh = new SRVRecordHelper(querySvc, querySvc.getDefaultProtocol(), stunServer, port);
 		for(InetSocketAddress sa : srh) {
 			
 			String _stunServer = sa.getHostName();
